@@ -221,7 +221,6 @@ function ENT:CreateModels()
 	}
 	
 	--just testing something
-	--one more test
 	
 	if self.piecechange and type(self.piecechange) == "table" then
 		for k,v in pairs(self.piecechange) do
