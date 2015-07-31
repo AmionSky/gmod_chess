@@ -1,0 +1,11 @@
+{
+	"title"		:	"ASD",
+	"type"		:	"map",
+	"tags"		:	[ "realism", "cartoon" ],
+	"ignore"	:
+	[
+		"*.psd",
+		"*.vcproj",
+		"*.svn*"
+	]
+}
