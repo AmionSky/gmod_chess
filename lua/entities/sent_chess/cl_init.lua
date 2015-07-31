@@ -219,7 +219,6 @@ function ENT:CreateModels()
 		[31] = ClientsideModel(ChessModels[12], RENDERGROUP_OPAQUE),
 		[32] = ClientsideModel(ChessModels[12], RENDERGROUP_OPAQUE)
 	}
-	onemoretest
 	
 	if self.piecechange and type(self.piecechange) == "table" then
 		for k,v in pairs(self.piecechange) do
