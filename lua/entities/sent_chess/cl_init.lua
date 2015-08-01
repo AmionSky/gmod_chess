@@ -129,7 +129,7 @@ net.Receive('Chess_ChangePiece', function()
 		chess.mdls.piece[ind]:SetNoDraw(true)
 		chess.mdls.piece[ind]:SetPos(chess:GetPos())
 		local mat = Matrix()
-		mat:Scale(Vector(0.44, 0.44, 0.44))
+		mat:Scale(Vector(0.22, 0.22, 0.22))
 		chess.mdls.piece[ind]:EnableMatrix("RenderMultiply", mat)
 	end
 end)
