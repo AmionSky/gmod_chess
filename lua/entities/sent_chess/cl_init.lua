@@ -102,7 +102,6 @@ net.Receive('Chess_Step', function()
 	local bitvar = 2
 	if net.ReadBit() == 1 then bitvar = 4 end
 	chess:ChangeStep(net.ReadTable(),bitvar)
-	chess:PrintBoardData()
 end)
 net.Receive('Chess_ChangePiece', function()
 	local chess = Entity(net.ReadUInt(32))
@@ -245,12 +244,6 @@ function ENT:ResetAvailable()
 		for j=1,8 do
 			self.available[i][j] = false
 		end
-	end
-end
-
-function ENT:PrintBoardData()
-	for i=1,8 do
-		print(self.brd_data[i][1]..self.brd_data[i][2]..self.brd_data[i][3]..self.brd_data[i][4]..self.brd_data[i][5]..self.brd_data[i][6]..self.brd_data[i][7]..self.brd_data[i][8])
 	end
 end
 

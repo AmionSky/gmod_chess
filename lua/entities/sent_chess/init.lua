@@ -125,6 +125,7 @@ function ENT:EndGame()
 	end
 	self:ChangeTurn()
 	self:StartGame()
+	self:SendData()
 end
 
 function ENT:Use(act)
