@@ -182,7 +182,7 @@ function ENT:CreateModels()
 	self.mdls.brd:SetNoDraw(true)
 	self.mdls.brd:SetPos(self:GetPos())
 	local matbrd = Matrix()
-	matbrd:Scale(Vector(0.36, 0.36, 0.36))
+	matbrd:Scale(Vector(0.13, 0.13, 0.13)) --Was .36
 	self.mdls.brd:EnableMatrix("RenderMultiply", matbrd)
 	
 	self.mdls.piece = {
@@ -230,7 +230,7 @@ function ENT:CreateModels()
 		v:SetNoDraw(true)
 		v:SetPos(self:GetPos())
 		local mat = Matrix()
-		mat:Scale(Vector(0.44, 0.44, 0.44))
+		mat:Scale(Vector(0.22, 0.22, 0.22))
 		v:EnableMatrix("RenderMultiply", mat)
 	end
 end
@@ -1050,7 +1050,7 @@ function ENT:Draw()
 	end
 	
 	if LocalPlayer() == self:GetTurnPly() then
-		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, 0.2, 34.57 ), self:GetAngles(), 0.085 )
+		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, 0.2, 34.58 ), self:GetAngles(), 0.085 )
 		if self.look.x != 0 and self.look.y != 0 then
 			if ( self.brd_data[self.look.x][self.look.y] != 0 and (self:GetTableTurn() == 1 and self.brd_data[self.look.x][self.look.y] < 17) or (self:GetTableTurn() == 2 and self.brd_data[self.look.x][self.look.y] > 16)) then
 				surface.SetDrawColor(Color(0,255,0,200))
