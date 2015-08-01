@@ -201,7 +201,7 @@ end
 function ENT:SendStep(ch,c)
 	net.Start( 'Chess_Step' )
 		net.WriteUInt( self:EntIndex(), 32 )
-		net.WriteBit(c)
+		net.WriteBool(c)
 		net.WriteTable(ch)
 	net.Broadcast()
 end

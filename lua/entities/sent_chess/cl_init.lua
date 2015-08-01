@@ -99,8 +99,8 @@ end)
 net.Receive('Chess_Step', function()
 	local chess = Entity(net.ReadUInt(32))
 	if not IsValid(chess) then return end
-	local bitvar = 2
-	if net.ReadBit() == 1 then bitvar = 4 end
+	local bitvar
+	if net.ReadBool() then bitvar = 4 else bitvar = 2 end
 	chess:ChangeStep(net.ReadTable(),bitvar)
 end)
 net.Receive('Chess_ChangePiece', function()
