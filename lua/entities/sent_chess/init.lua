@@ -297,17 +297,16 @@ function ENT:ChangeTurn()
 end
 
 function ENT:Think()
-	local msg = "Too far from board, kicked!"
 	if IsValid(self:GetPly1()) then
 		if(self:GetPly1():GetPos():Distance(self:GetPos()) > 200) then
-			self:GetPly1():ChatPrint(msg)
+			self:GetPly1():ChatPrint("Too far from board, kicked!")
 			if self:GetTableOwner() == self:GetPly1() then self:SetTableOwner(self:GetPly2()) end
 			self:SetPly1(nil)
 		end
 	end
 	if IsValid(self:GetPly2()) then
 		if(self:GetPly2():GetPos():Distance(self:GetPos()) > 200) then
-			self:GetPly2():ChatPrint(msg)
+			self:GetPly2():ChatPrint("Too far from board, kicked!")
 			if self:GetTableOwner() == self:GetPly2() then self:SetTableOwner(self:GetPly1()) end
 			self:SetPly2(nil)
 		end

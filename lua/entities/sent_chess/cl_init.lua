@@ -337,27 +337,27 @@ function ENT:Draw()
 	local boardpos,boardang = LocalToWorld(Vector(0, 0, 32), Angle(-90, 0, 0), self:GetPos(), self:GetAngles())
 	self.mdls.brd:SetRenderOrigin(boardpos)
 	self.mdls.brd:SetRenderAngles(boardang)
-	self.mdls.brd:SetupBones()
+	--self.mdls.brd:SetupBones()
 	self.mdls.brd:DrawModel()
 	
 	if LocalPlayer():GetShootPos():Distance(self:GetPos()) > 500 then return end
 	
 	local piecepos,pieceang = LocalToWorld(Vector(0, 0, 34.5), Angle(0, 0, 0), self:GetPos(), self:GetAngles())
+	local piecepos_w,pieceang_w = LocalToWorld(Vector(0, 0, 34.5), Angle(0, -90, 0), self:GetPos(), self:GetAngles())
+	local piecepos_b,pieceang_b = LocalToWorld(Vector(0, 0, 34.5), Angle(0, 90, 0), self:GetPos(), self:GetAngles())
 	for i=1,8 do
 		for	j=1,8 do
 			if self.brd_data[i][j] != 0 then
 				local mdl = self.mdls.piece[self.brd_data[i][j]]
 				mdl:SetRenderOrigin(SetPosToChess(piecepos, pieceang, brdpos.x[i], brdpos.y[j], 0 ))
 				if self.brd_data[i][j] == 2 or self.brd_data[i][j] == 7 then
-					local piecepos,pieceang = LocalToWorld(Vector(0, 0, 34.5), Angle(0, -90, 0), self:GetPos(), self:GetAngles())
-					mdl:SetRenderAngles(pieceang)
+					mdl:SetRenderAngles(pieceang_w)
 				elseif self.brd_data[i][j] == 18 or self.brd_data[i][j] == 23 then
-					local piecepos,pieceang = LocalToWorld(Vector(0, 0, 34.5), Angle(0, 90, 0), self:GetPos(), self:GetAngles())
-					mdl:SetRenderAngles(pieceang)
+					mdl:SetRenderAngles(pieceang_b)
 				else
 					mdl:SetRenderAngles(pieceang)
 				end
-				mdl:SetupBones()
+				--mdl:SetupBones()
 				mdl:DrawModel()
 			end
 		end
