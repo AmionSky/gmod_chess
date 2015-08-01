@@ -200,8 +200,8 @@ end
 function ENT:SendStep(ch,c)
 	net.Start( 'Chess_Step' )
 		net.WriteUInt( self:EntIndex(), 32 )
-		net.WriteTable(ch)
 		net.WriteBit(c)
+		net.WriteTable(ch)
 	net.Broadcast()
 end
 
@@ -232,8 +232,8 @@ function ENT:MovePiece( sx, sy, mx, my )
 	local selectedind = self.brd_data[sx][sy]
 	
 	if selectedind == 0 then
-		//re send !!
 		Error("Chess: #"..self:EntIndex().." | Incorrect step!\n")
+		return
 	end
 	if self.brd_data[mx][my] == 4 or self.brd_data[mx][my] == 20 then
 		self:EndGame()
