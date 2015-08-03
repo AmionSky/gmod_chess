@@ -152,14 +152,12 @@ function ENT:AddHooks()
 	hook.Add("KeyPress", self, function(self, ply, key)
 		if not IsValid(self) then return end
 		if key == IN_RELOAD and self:GetTableOwner() == ply and RealTime() - last_time > 3 then
-			if self:GetTableOwner() == ply then
-				net.Start( 'Chess_Game' )
-					net.WriteUInt( self:EntIndex(), 32 )
-					net.WriteUInt( 1, 3 )
-					net.WriteEntity( LocalPlayer() )
-				net.SendToServer()
-				last_time = RealTime()
-			end
+			net.Start( 'Chess_Game' )
+				net.WriteUInt( self:EntIndex(), 32 )
+				net.WriteUInt( 1, 3 )
+				net.WriteEntity( LocalPlayer() )
+			net.SendToServer()
+			last_time = RealTime()
 		end
 		if key == IN_ATTACK and self:GetTurnPly() == ply and self.look.x != 0 and self.look.y != 0 then
 			if self.available[self.look.x][self.look.y] then
