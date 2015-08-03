@@ -1,5 +1,6 @@
 AddCSLuaFile('cl_init.lua')
 AddCSLuaFile('shared.lua')
+AddCSLuaFile('rules.lua')
 include('shared.lua')
 
 util.AddNetworkString( 'Chess_Game' )
