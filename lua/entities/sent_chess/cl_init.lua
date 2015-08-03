@@ -25,24 +25,24 @@ local brdpos = {
 }
 local rectpos = {
 	["x"] = {
-		[1] = -4 * 5,
-		[2] = -3 * 5,
-		[3] = -2 * 5,
-		[4] = -1 * 5,
-		[5] = 0 * 5,
-		[6] = 1 * 5,
-		[7] = 2 * 5,
-		[8] = 3 * 5
+		[1] = -20,
+		[2] = -15,
+		[3] = -10,
+		[4] = -5,
+		[5] = 0,
+		[6] = 5,
+		[7] = 10,
+		[8] = 15
 	},
 	["y"] = {
-		[1] = 3 * 5,
-		[2] = 2 * 5,
-		[3] = 1 * 5,
-		[4] = 0 * 5,
-		[5] = -1 * 5,
-		[6] = -2 * 5,
-		[7] = -3 * 5,
-		[8] = -4 * 5
+		[1] = 15,
+		[2] = 10,
+		[3] = 5,
+		[4] = 0,
+		[5] = -5,
+		[6] = -10,
+		[7] = -15,
+		[8] = -20
 	}
 }
 local ChessModels = {
@@ -70,68 +70,60 @@ surface.CreateFont( "ChessGameFontPlayer", {
 	outline 	= false
 } )
 
-net.Receive('Chess_SendPlyData', function()
+net.Receive('Chess_Game', function()
 	local chess = Entity(net.ReadUInt(32))
+	local cmd = net.ReadUInt(4)
 	if not IsValid(chess) then return end
-	chess.piece.type = net.ReadTable()
-	chess.piece.moved = net.ReadTable()
-	chess.sel = { ["x"] = 0, ["y"] = 0 }
-	chess.look = { ["x"] = 0, ["y"] = 0 }
-	chess:ResetAvailable()
-	chess:AddHooks()
-	chess:CheckKing()
-end)
-net.Receive('Chess_ResetGame', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	chess:ResetGameCl()
-end)
-net.Receive('Chess_RemoveFGame', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	hook.Remove( "KeyPress", chess )
-end)
-net.Receive('Chess_SendData', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	chess.brd_data = net.ReadTable()
-end)
-net.Receive('Chess_Step', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	local bitvar
-	if net.ReadBool() then bitvar = 4 else bitvar = 2 end
-	chess:ChangeStep(net.ReadTable(),bitvar)
-end)
-net.Receive('Chess_ChangePiece', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	local ind = net.ReadUInt(32)
-	if not chess.mdls or not chess.mdls.piece or not IsValid(chess.mdls.piece[ind]) then
-		if not chess.piecechange then
-			chess.piecechange = {}
-		end
-		if ind <= 16 then
-			chess.piecechange[ind] = 5
-		else
-			chess.piecechange[ind] = 11
-		end
-	else
-		if chess.mdls.piece[ind].SetNoDraw then
-			chess.mdls.piece[ind]:Remove()
-		end
-		if ind <= 16 then
-			chess.mdls.piece[ind] = ClientsideModel(ChessModels[5], RENDERGROUP_OPAQUE)
-		else
-			chess.mdls.piece[ind] = ClientsideModel(ChessModels[11], RENDERGROUP_OPAQUE)
-		end
-		chess.mdls.piece[ind]:SetNoDraw(true)
-		chess.mdls.piece[ind]:SetPos(chess:GetPos())
-		local mat = Matrix()
-		mat:Scale(Vector(0.22, 0.22, 0.22))
-		chess.mdls.piece[ind]:EnableMatrix("RenderMultiply", mat)
+	if		cmd == 1 then
+		chess.brd_data = net.ReadTable()
+	elseif	cmd == 2 then
+		chess:ChangeStep(net.ReadTable(),net.ReadBool())
+	elseif	cmd == 3 then
+		chess:ChangePiece(net.ReadUInt(7))
+	elseif	cmd == 4 then
+		chess:SendPlyData(net.ReadTable(),net.ReadTable())
+	elseif	cmd == 5 then
+		hook.Remove( "KeyPress", chess )
+	elseif	cmd == 6 then
+		chess:ResetGameCl()
 	end
 end)
+
+function ENT:SendPlyData(t_type,t_moved)
+	self.piece.type = t_type
+	self.piece.moved = t_moved
+	self.sel = { ["x"] = 0, ["y"] = 0 }
+	self.look = { ["x"] = 0, ["y"] = 0 }
+	self:ResetAvailable()
+	self:AddHooks()
+	self:CheckKing()
+end
+function ENT:ChangePiece(ind)
+	if not self.mdls or not self.mdls.piece or not IsValid(self.mdls.piece[ind]) then
+		if not self.piecechange then
+			self.piecechange = {}
+		end
+		if ind <= 16 then
+			self.piecechange[ind] = 5
+		else
+			self.piecechange[ind] = 11
+		end
+	else
+		if self.mdls.piece[ind].SetNoDraw then
+			self.mdls.piece[ind]:Remove()
+		end
+		if ind <= 16 then
+			self.mdls.piece[ind] = ClientsideModel(ChessModels[5], RENDERGROUP_OPAQUE)
+		else
+			self.mdls.piece[ind] = ClientsideModel(ChessModels[11], RENDERGROUP_OPAQUE)
+		end
+		self.mdls.piece[ind]:SetNoDraw(true)
+		self.mdls.piece[ind]:SetPos(self:GetPos())
+		local mat = Matrix()
+		mat:Scale(Vector(0.22, 0.22, 0.22))
+		self.mdls.piece[ind]:EnableMatrix("RenderMultiply", mat)
+	end
+end
 
 function ENT:Initialize()
 	self.available = {}
@@ -148,8 +140,9 @@ function ENT:Initialize()
 	end
 	self:ResetBrdData()
 	
-	net.Start( 'Chess_SendData' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 0, 3 )
 		net.WriteEntity( LocalPlayer() )
 	net.SendToServer()
 end
@@ -160,8 +153,9 @@ function ENT:AddHooks()
 		if not IsValid(self) then return end
 		if key == IN_RELOAD and self:GetTableOwner() == ply and RealTime() - last_time > 3 then
 			if self:GetTableOwner() == ply then
-				net.Start( 'Chess_ResetGame' )
+				net.Start( 'Chess_Game' )
 					net.WriteUInt( self:EntIndex(), 32 )
+					net.WriteUInt( 1, 3 )
 					net.WriteEntity( LocalPlayer() )
 				net.SendToServer()
 				last_time = RealTime()
@@ -309,13 +303,14 @@ function ENT:Think()
 end
 
 function ENT:MovePiece(x,y)
-	net.Start( 'Chess_MovePiece' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 2, 3 )
 		net.WriteEntity( LocalPlayer() )
-		net.WriteUInt( self.sel.x, 32 )
-		net.WriteUInt( self.sel.y, 32 )
-		net.WriteUInt( x, 32 )
-		net.WriteUInt( y, 32 )
+		net.WriteUInt( self.sel.x, 5 )
+		net.WriteUInt( self.sel.y, 5 )
+		net.WriteUInt( x, 5 )
+		net.WriteUInt( y, 5 )
 	net.SendToServer()
 	self.sel.x = 0
 	self.sel.y = 0

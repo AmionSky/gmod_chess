@@ -2,48 +2,36 @@ AddCSLuaFile('cl_init.lua')
 AddCSLuaFile('shared.lua')
 include('shared.lua')
 
-util.AddNetworkString( 'Chess_SendPlyData' )
-util.AddNetworkString( 'Chess_SendData' )
-util.AddNetworkString( 'Chess_ChangePiece' )
-util.AddNetworkString( 'Chess_ResetGame' )
-util.AddNetworkString( 'Chess_RemoveFGame' )
-util.AddNetworkString( 'Chess_MovePiece' )
-util.AddNetworkString( 'Chess_Step' )
+util.AddNetworkString( 'Chess_Game' )
 
-net.Receive('Chess_ResetGame', function()
+net.Receive('Chess_Game', function()
 	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
+	local cmd = net.ReadUInt(3)
 	local ply = net.ReadEntity()
-	if chess:GetTableOwner() != ply then return end
+	if not IsValid(chess) then return end
+	if 		cmd == 0 then
+		if IsValid(ply) then chess:SendData(ply) end
+	elseif	cmd == 1 then
+		chess:ResetGame(ply)
+	elseif	cmd == 2 then
+		if chess:GetTurnPly() == ply then chess:MovePiece( net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5) ) end
+	end
+end)
+
+function ENT:ResetGame(ply)
+	if self:GetTableOwner() != ply then return end
 	if IsValid(ply) then
 		local msg = "Resetting by request of " .. ply:Nick() .. " ("..ply:SteamID()..")"
-		if IsValid(chess:GetPly1()) then chess:GetPly1():ChatPrint(msg) end
-		if IsValid(chess:GetPly2()) then chess:GetPly2():ChatPrint(msg) end
+		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
+		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint(msg) end
 	end
-	net.Start( 'Chess_ResetGame' )
-		net.WriteUInt( chess:EntIndex(), 32 )
+	net.Start( 'Chess_Game' )
+		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 6, 4 )
 	net.Broadcast()
-	chess:StartGame()
-	chess:SendData()
-end )
-net.Receive('Chess_MovePiece', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	if chess:GetTurnPly() != net.ReadEntity() then return end
-	local sx = net.ReadUInt(32)
-	local sy = net.ReadUInt(32)
-	local mx = net.ReadUInt(32)
-	local my = net.ReadUInt(32)
-	if sx <= 8 and sy <= 8 and mx <= 8 and my <= 8 and sx > 0 and sy > 0 and mx > 0 and my > 0 then
-		chess:MovePiece( sx, sy, mx, my )
-	end
-end )
-net.Receive('Chess_SendData', function()
-	local chess = Entity(net.ReadUInt(32))
-	if not IsValid(chess) then return end
-	local ply = net.ReadEntity()
-	if IsValid(ply) then chess:SendData(ply) end
-end )
+	self:StartGame()
+	self:SendData()
+end
 
 function ENT:SpawnFunction(ply, tr)
 	if not tr.Hit then return end
@@ -188,8 +176,9 @@ function ENT:Use(act)
 end
 
 function ENT:SendData(ply)
-	net.Start( 'Chess_SendData' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 1, 4 )
 		net.WriteTable( self.brd_data )
 	if IsValid(ply) then
 		net.Send(ply)
@@ -199,24 +188,27 @@ function ENT:SendData(ply)
 end
 
 function ENT:SendStep(ch,c)
-	net.Start( 'Chess_Step' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
-		net.WriteBool(c)
+		net.WriteUInt( 2, 4 )
 		net.WriteTable(ch)
+		net.WriteBool(c)
 	net.Broadcast()
 end
 
 function ENT:ChangePiece( ind )
-	net.Start( 'Chess_ChangePiece' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
-		net.WriteUInt( ind, 32 )
+		net.WriteUInt( 3, 4 )
+		net.WriteUInt( ind, 7 )
 	net.Broadcast()
 end
 
 function ENT:SendPlyData( ply )
 	if IsValid(ply) then
-		net.Start( 'Chess_SendPlyData' )
+		net.Start( 'Chess_Game' )
 			net.WriteUInt( self:EntIndex(), 32 )
+			net.WriteUInt( 4, 4 )
 			net.WriteTable( self.piece.type )
 			net.WriteTable( self.piece.moved )
 		net.Send( ply )
@@ -224,8 +216,9 @@ function ENT:SendPlyData( ply )
 end
 
 function ENT:RemoveFGame( ply )
-	net.Start( 'Chess_RemoveFGame' )
+	net.Start( 'Chess_Game' )
 		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 5, 4 )
 	net.Send( ply )
 end
 
@@ -258,8 +251,8 @@ function ENT:MovePiece( sx, sy, mx, my )
 			if my == 8 then
 				ch[3] = { 3,8,self.brd_data[1][8] }
 				ch[4] = { 1,8,0 }
-				//self.brd_data[3][8] = self.brd_data[1][8]
-				//self.brd_data[1][8] = 0
+				--self.brd_data[3][8] = self.brd_data[1][8]
+				--self.brd_data[1][8] = 0
 			else
 				ch[3] = { 3,1,self.brd_data[1][1] }
 				ch[4] = { 1,1,0 }
@@ -278,11 +271,8 @@ function ENT:MovePiece( sx, sy, mx, my )
 		end
 	end
 	
-	local m = 2
-	if c then m = 4 end
-	
 	self:SendStep(ch,c)
-	self:ChangeStep(ch,m)
+	self:ChangeStep(ch,c)
 	self:SendPlyData( self:GetPly1() )
 	self:SendPlyData( self:GetPly2() )
 	self:ChangeTurn()
