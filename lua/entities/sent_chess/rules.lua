@@ -228,7 +228,7 @@ end
 function ENT:CheckPiece( x, y )
 	local ind = self.brd_data[x][y]
 	local i, j
-	if (self:GetTableTurn() == 1 and ind > 16) or (self:GetTableTurn() == 2 and ind <= 16) then return end
+	if ( self:GetTableTurn() and ind > 16 ) or ( not self:GetTableTurn() and ind <= 16 ) then return end
 	
 	self.sel.x = x
 	self.sel.y = y

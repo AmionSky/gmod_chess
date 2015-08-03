@@ -9,8 +9,8 @@ ENT.AdminSpawnable	= false
 function ENT:SetupDataTables()
 	self:NetworkVar("Entity" , 0, "Ply1")
 	self:NetworkVar("Entity" , 1, "Ply2")
-	self:NetworkVar("Entity" , 2, "TableOwner")
-	self:NetworkVar("Int", 0, "TableTurn")
+	self:NetworkVar("Bool" , 0, "TableOwner")	-- True = Player1 | False = Player2
+	self:NetworkVar("Bool", 1, "TableTurn")
 end
 
 function ENT:ResetBrdData()
@@ -35,7 +35,7 @@ function ENT:ChangeStep(ch,c)
 end
 
 function ENT:GetTurnPly()
-	if self:GetTableTurn() == 1 then
+	if self:GetTableTurn() then
 		return self:GetPly1()
 	else
 		return self:GetPly2()

@@ -148,10 +148,10 @@ function ENT:Initialize()
 end
 
 function ENT:AddHooks()
-	local last_time = RealTime()
+	local last_time = RealTime() - 3
 	hook.Add("KeyPress", self, function(self, ply, key)
 		if not IsValid(self) then return end
-		if key == IN_RELOAD and self:GetTableOwner() == ply and RealTime() - last_time > 3 then
+		if key == IN_RELOAD and (( self:GetTableOwner() and self:GetPly1() == ply ) or ( not self:GetTableOwner() and self:GetPly2() == ply )) and RealTime() - last_time > 3 then
 			net.Start( 'Chess_Game' )
 				net.WriteUInt( self:EntIndex(), 32 )
 				net.WriteUInt( 1, 3 )
@@ -360,24 +360,24 @@ function ENT:Draw()
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis( ang:Up(), 180 )
 		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, 20, 32.3 ), ang, 0.2 )
-			if self:GetTableTurn() == 1 then
+			if self:GetTableTurn() then
 				draw.DrawText( self:GetPly1():Nick(), "ChessGameFontPlayer", 0, 0, Color( 0, 255, 0 ), 1 )
 			else
 				draw.DrawText( self:GetPly1():Nick(), "ChessGameFontPlayer", 0, 0, Color( 255, 0, 0 ), 1 )
 			end
-			if self:GetTableOwner() == self:GetPly1() then
+			if self:GetTableOwner() then
 				draw.DrawText("Owner", "ChessGameFontPlayer", 0, 20, Color(255, 255, 0), TEXT_ALIGN_CENTER)
 			end
 		cam.End3D2D()
 	end
 	if IsValid(self:GetPly2()) then
 		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, -20, 32.3 ), self:GetAngles(), 0.2 )
-			if self:GetTableTurn() == 2 then
+			if not self:GetTableTurn() then
 				draw.DrawText( self:GetPly2():Nick(), "ChessGameFontPlayer", 0, 0, Color( 0, 255, 0 ), 1 )
 			else
 				draw.DrawText( self:GetPly2():Nick(), "ChessGameFontPlayer", 0, 0, Color( 255, 0, 0 ), 1 )
 			end
-			if self:GetTableOwner() == self:GetPly2() then
+			if not self:GetTableOwner() then
 				draw.DrawText("Owner", "ChessGameFontPlayer", 0, 20, Color(255, 255, 0), TEXT_ALIGN_CENTER)
 			end
 		cam.End3D2D()
@@ -386,7 +386,7 @@ function ENT:Draw()
 	if LocalPlayer() == self:GetTurnPly() then
 		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, 0.2, 34.58 ), self:GetAngles(), 0.085 )
 		if self.look.x != 0 and self.look.y != 0 then
-			if ( self.brd_data[self.look.x][self.look.y] != 0 and (self:GetTableTurn() == 1 and self.brd_data[self.look.x][self.look.y] < 17) or (self:GetTableTurn() == 2 and self.brd_data[self.look.x][self.look.y] > 16)) then
+			if ( self.brd_data[self.look.x][self.look.y] != 0 and (self:GetTableTurn() and self.brd_data[self.look.x][self.look.y] < 17) or ( not self:GetTableTurn() and self.brd_data[self.look.x][self.look.y] > 16)) then
 				surface.SetDrawColor(Color(0,255,0,200))
 			else
 				surface.SetDrawColor(Color(255,0,0,200))

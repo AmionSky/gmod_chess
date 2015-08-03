@@ -19,7 +19,7 @@ net.Receive('Chess_Game', function()
 end)
 
 function ENT:ResetGame(ply)
-	if self:GetTableOwner() != ply then return end
+	if ( self:GetTableOwner() and self:GetPly1() != ply ) and ( not self:GetTableOwner() and self:GetPly2() != ply ) then return end
 	if IsValid(ply) then
 		local msg = "Resetting by request of " .. ply:Nick() .. " ("..ply:SteamID()..")"
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
@@ -104,7 +104,7 @@ function ENT:StartGame()
 end
 
 function ENT:EndGame()
-	if self:GetTableTurn() == 1 then
+	if self:GetTableTurn() then
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint("Win") end
 		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint("Lose") end
 	else
@@ -129,14 +129,14 @@ function ENT:Use(act)
 	end
 	
 	if act == self:GetPly1() then
-		if IsValid(self:GetPly2()) then self:SetTableOwner(self:GetPly2()) end
+		if IsValid(self:GetPly2()) then self:SetTableOwner(false) end
 		self:SetPly1(nil)
 		self:RemoveFGame( act )
 		act:ChatPrint("Removing from game")
 		return
 	end
 	if act == self:GetPly2() then
-		if IsValid(self:GetPly1()) then self:SetTableOwner(self:GetPly1()) end
+		if IsValid(self:GetPly1()) then self:SetTableOwner(true) end
 		self:SetPly2(nil)
 		self:RemoveFGame( act )
 		act:ChatPrint("Removing from game")
@@ -152,8 +152,8 @@ function ENT:Use(act)
 		if not IsValid(self:GetPly1()) then
 			self:SetPly1(act)
 			if not IsValid(self:GetPly2()) then
-				self:SetTableOwner(self:GetPly1())
-				self:SetTableTurn(1)
+				self:SetTableOwner(true)
+				self:SetTableTurn(true)
 				act:ChatPrint(resettext)
 			end
 			self:SendPlyData( act )
@@ -164,8 +164,8 @@ function ENT:Use(act)
 		if not IsValid(self:GetPly2()) then
 			self:SetPly2(act)
 			if not IsValid(self:GetPly1()) then
-				self:SetTableOwner(self:GetPly2())
-				self:SetTableTurn(2)
+				self:SetTableOwner(false)
+				self:SetTableTurn(false)
 				act:ChatPrint(resettext)
 			end
 			self:SendPlyData( act )
@@ -279,10 +279,10 @@ function ENT:MovePiece( sx, sy, mx, my )
 end
 
 function ENT:ChangeTurn()
-	if self:GetTableTurn() == 1 then
-		self:SetTableTurn(2)
+	if self:GetTableTurn() then
+		self:SetTableTurn(false)
 	else
-		self:SetTableTurn(1)
+		self:SetTableTurn(true)
 	end
 end
 
@@ -290,14 +290,14 @@ function ENT:Think()
 	if IsValid(self:GetPly1()) then
 		if(self:GetPly1():GetPos():Distance(self:GetPos()) > 200) then
 			self:GetPly1():ChatPrint("Too far from board, kicked!")
-			if self:GetTableOwner() == self:GetPly1() then self:SetTableOwner(self:GetPly2()) end
+			if self:GetTableOwner() then self:SetTableOwner(false) end
 			self:SetPly1(nil)
 		end
 	end
 	if IsValid(self:GetPly2()) then
 		if(self:GetPly2():GetPos():Distance(self:GetPos()) > 200) then
 			self:GetPly2():ChatPrint("Too far from board, kicked!")
-			if self:GetTableOwner() == self:GetPly2() then self:SetTableOwner(self:GetPly1()) end
+			if not self:GetTableOwner() then self:SetTableOwner(true) end
 			self:SetPly2(nil)
 		end
 	end
