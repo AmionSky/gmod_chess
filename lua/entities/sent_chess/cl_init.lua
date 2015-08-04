@@ -45,6 +45,10 @@ local rectpos = {
 		[8] = -20
 	}
 }
+local mdlsize = {
+	[1] = 0.13
+	[2] = 0.22
+}
 local ChessModels = {
 		[1] = "models/props_phx/games/chess/white_rook.mdl",
 		[2] = "models/props_phx/games/chess/white_knight.mdl",
@@ -58,7 +62,7 @@ local ChessModels = {
 		[10] = "models/props_phx/games/chess/black_king.mdl",
 		[11] = "models/props_phx/games/chess/black_queen.mdl",
 		[12] = "models/props_phx/games/chess/black_pawn.mdl"
-	}
+}
 
 surface.CreateFont( "ChessGameFontPlayer", {
 	font 		= "Default",
@@ -110,7 +114,7 @@ function ENT:ChangePiece(ind)
 		self.mdls.piece[ind]:SetNoDraw(true)
 		self.mdls.piece[ind]:SetPos(self:GetPos())
 		local mat = Matrix()
-		mat:Scale(Vector(0.22, 0.22, 0.22))
+		mat:Scale(Vector(mdlsize[2], mdlsize[2], mdlsize[2]))
 		self.mdls.piece[ind]:EnableMatrix("RenderMultiply", mat)
 	end
 end
@@ -125,9 +129,6 @@ function ENT:Initialize()
 		["type"] = {},
 		["moved"] = {}
 	}
-	for i=1,32 do
-		self.piece.moved[i] = false
-	end
 	self:ResetBrdData()
 	
 	net.Start( 'Chess_Game' )
@@ -167,9 +168,12 @@ function ENT:CreateModels()
 	self.mdls.brd:SetNoDraw(true)
 	self.mdls.brd:SetPos(self:GetPos())
 	local matbrd = Matrix()
-	matbrd:Scale(Vector(0.13, 0.13, 0.13)) --Was .36
+	matbrd:Scale(Vector(mdlsize[1], mdlsize[1], mdlsize[1]))
 	self.mdls.brd:EnableMatrix("RenderMultiply", matbrd)
-	
+	self:CreatePieceModels()
+end
+
+function ENT:CreatePieceModels()
 	self.mdls.piece = {
 		[1]  = ClientsideModel(ChessModels[1], RENDERGROUP_OPAQUE),
 		[2]  = ClientsideModel(ChessModels[2], RENDERGROUP_OPAQUE),
@@ -209,7 +213,7 @@ function ENT:CreateModels()
 		v:SetNoDraw(true)
 		v:SetPos(self:GetPos())
 		local mat = Matrix()
-		mat:Scale(Vector(0.22, 0.22, 0.22))
+		mat:Scale(Vector(mdlsize[2], mdlsize[2], mdlsize[2]))
 		v:EnableMatrix("RenderMultiply", mat)
 	end
 end
@@ -226,7 +230,8 @@ end
 function ENT:ResetGameCl()
 	self.sel.x = 0
 	self.sel.y = 0
-	self:CreateModels()		-- !!! Is it safe to do it?
+	self:RemovePieceModels()
+	self:CreatePieceModels()
 	self:ResetBrdData()
 	self:ResetAvailable()
 	for i=1,32 do
@@ -305,7 +310,6 @@ function ENT:Draw()
 	local boardpos,boardang = LocalToWorld(Vector(0, 0, 32), Angle(-90, 0, 0), self:GetPos(), self:GetAngles())
 	self.mdls.brd:SetRenderOrigin(boardpos)
 	self.mdls.brd:SetRenderAngles(boardang)
-	--self.mdls.brd:SetupBones()
 	self.mdls.brd:DrawModel()
 	
 	if LocalPlayer():GetShootPos():Distance(self:GetPos()) > 500 then return end
@@ -325,7 +329,6 @@ function ENT:Draw()
 				else
 					mdl:SetRenderAngles(pieceang)
 				end
-				--mdl:SetupBones()
 				mdl:DrawModel()
 			end
 		end
@@ -387,15 +390,19 @@ function ENT:Draw()
 		cam.End3D2D()
 	end
 end
- 
-function ENT:OnRemove()
-	if self.mdls.brd.SetNoDraw then
-		self.mdls.brd:Remove()
-	end
+
+function ENT:RemovePieceModels()
 	for k,v in pairs(self.mdls.piece) do
 		if v.SetNoDraw then
 			v:Remove()
 		end
 	end
+end
+ 
+function ENT:OnRemove()
+	if self.mdls.brd.SetNoDraw then
+		self.mdls.brd:Remove()
+	end
+	self:RemovePieceModels()
 	hook.Remove( "KeyPress", self )
 end
