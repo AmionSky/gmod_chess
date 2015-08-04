@@ -99,19 +99,9 @@ function ENT:SendPlyData(t_type,t_moved)
 	self:CheckKing()
 end
 function ENT:ChangePiece(ind)
-	if not self.mdls or not self.mdls.piece or not IsValid(self.mdls.piece[ind]) then
-		if not self.piecechange then
-			self.piecechange = {}
-		end
-		if ind <= 16 then
-			self.piecechange[ind] = 5
-		else
-			self.piecechange[ind] = 11
-		end
-	else
-		if self.mdls.piece[ind].SetNoDraw then
-			self.mdls.piece[ind]:Remove()
-		end
+	if self.mdls and self.mdls.piece and IsValid(self.mdls.piece[ind]) then
+		self.piece.type[ind] = 5
+		self.mdls.piece[ind]:Remove()
 		if ind <= 16 then
 			self.mdls.piece[ind] = ClientsideModel(ChessModels[5], RENDERGROUP_OPAQUE)
 		else
@@ -214,12 +204,6 @@ function ENT:CreateModels()
 		[31] = ClientsideModel(ChessModels[12], RENDERGROUP_OPAQUE),
 		[32] = ClientsideModel(ChessModels[12], RENDERGROUP_OPAQUE)
 	}
-	
-	if self.piecechange and type(self.piecechange) == "table" then
-		for k,v in pairs(self.piecechange) do
-			self.mdls.piece[k] = ClientsideModel(ChessModels[v], RENDERGROUP_OPAQUE)
-		end
-	end
 	
 	for k,v in pairs(self.mdls.piece) do
 		v:SetNoDraw(true)

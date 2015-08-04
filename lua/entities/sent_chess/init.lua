@@ -231,7 +231,7 @@ function ENT:MovePiece( sx, sy, mx, my )
 	
 	if selectedind == 0 then
 		Error("Chess: #"..self:EntIndex().." | Incorrect step! Resyncing\n")
-		local msg = "Incorrect step has been made. (Probably out of sync?) Please leave and rejoin to the game!"
+		local msg = "Incorrect step has been made. (Probably out of sync?) Please leave and rejoin to the table!"
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
 		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint(msg) end
 		self:SendData()
@@ -279,8 +279,6 @@ function ENT:MovePiece( sx, sy, mx, my )
 	
 	self:SendStep(ch,c)
 	self:ChangeStep(ch,c)
-	self:SendPlyData( self:GetPly1() )	-- !!! No... No... Only important stuff plz
-	self:SendPlyData( self:GetPly2() )	-- Also no serverside "moved" change?
 	self:ChangeTurn()
 end
 
