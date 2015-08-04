@@ -26,12 +26,8 @@ function ENT:ResetGame(ply)
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
 		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint(msg) end
 	end
-	net.Start( 'Chess_Game' )
-		net.WriteUInt( self:EntIndex(), 32 )
-		net.WriteUInt( 6, 4 )
-	net.Broadcast()
+	self:SendReset()
 	self:StartGame()
-	self:SendData()
 end
 
 function ENT:SpawnFunction(ply, tr)
@@ -113,8 +109,8 @@ function ENT:EndGame()
 		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint("Win") end
 	end
 	self:ChangeTurn()
+	self:SendReset()
 	self:StartGame()
-	self:SendData()
 end
 
 function ENT:Use(act)
@@ -223,11 +219,22 @@ function ENT:RemoveFGame( ply )
 	net.Send( ply )
 end
 
+function ENT:SendReset()
+	net.Start( 'Chess_Game' )
+		net.WriteUInt( self:EntIndex(), 32 )
+		net.WriteUInt( 6, 4 )
+	net.Broadcast()
+end
+
 function ENT:MovePiece( sx, sy, mx, my )
 	local selectedind = self.brd_data[sx][sy]
 	
 	if selectedind == 0 then
-		Error("Chess: #"..self:EntIndex().." | Incorrect step!\n")
+		Error("Chess: #"..self:EntIndex().." | Incorrect step! Resyncing\n")
+		local msg = "Incorrect step has been made. (Probably out of sync?) Please leave and rejoin to the game!"
+		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
+		if IsValid(self:GetPly2()) then self:GetPly2():ChatPrint(msg) end
+		self:SendData()
 		return
 	end
 	if self.brd_data[mx][my] == 4 or self.brd_data[mx][my] == 20 then
@@ -252,8 +259,6 @@ function ENT:MovePiece( sx, sy, mx, my )
 			if my == 8 then
 				ch[3] = { 3,8,self.brd_data[1][8] }
 				ch[4] = { 1,8,0 }
-				--self.brd_data[3][8] = self.brd_data[1][8]
-				--self.brd_data[1][8] = 0
 			else
 				ch[3] = { 3,1,self.brd_data[1][1] }
 				ch[4] = { 1,1,0 }
@@ -274,8 +279,8 @@ function ENT:MovePiece( sx, sy, mx, my )
 	
 	self:SendStep(ch,c)
 	self:ChangeStep(ch,c)
-	self:SendPlyData( self:GetPly1() )
-	self:SendPlyData( self:GetPly2() )
+	self:SendPlyData( self:GetPly1() )	-- !!! No... No... Only important stuff plz
+	self:SendPlyData( self:GetPly2() )	-- Also no serverside "moved" change?
 	self:ChangeTurn()
 end
 

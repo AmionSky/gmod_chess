@@ -242,11 +242,17 @@ end
 function ENT:ResetGameCl()
 	self.sel.x = 0
 	self.sel.y = 0
-	self:CreateModels()
+	self:CreateModels()		-- !!! Is it safe to do it?
 	self:ResetBrdData()
 	self:ResetAvailable()
 	for i=1,32 do
 		self.piece.moved[i] = false
+	end
+	for i=9,16 do
+		self.piece.type[i] = 0
+	end
+	for i=25,32 do
+		self.piece.type[i] = 0
 	end
 	self.piece.type[1] = 1
 	self.piece.type[2] = 2
@@ -256,14 +262,6 @@ function ENT:ResetGameCl()
 	self.piece.type[6] = 3
 	self.piece.type[7] = 2
 	self.piece.type[8] = 1
-	self.piece.type[9] = 0
-	self.piece.type[10] = 0
-	self.piece.type[11] = 0
-	self.piece.type[12] = 0
-	self.piece.type[13] = 0
-	self.piece.type[14] = 0
-	self.piece.type[15] = 0
-	self.piece.type[16] = 0
 	self.piece.type[17] = 1
 	self.piece.type[18] = 2
 	self.piece.type[19] = 3
@@ -272,14 +270,6 @@ function ENT:ResetGameCl()
 	self.piece.type[22] = 3
 	self.piece.type[23] = 2
 	self.piece.type[24] = 1
-	self.piece.type[25] = 0
-	self.piece.type[26] = 0
-	self.piece.type[27] = 0
-	self.piece.type[28] = 0
-	self.piece.type[29] = 0
-	self.piece.type[30] = 0
-	self.piece.type[31] = 0
-	self.piece.type[32] = 0
 end
 
 function ENT:Think()
