@@ -15,12 +15,12 @@ net.Receive('Chess_Game', function()
 	elseif	cmd == 1 then
 		chess:ResetGame(ply)
 	elseif	cmd == 2 then
-		if chess:GetTurnPly() == ply then chess:MovePiece( net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5) ) end
+		if chess:GetPly(chess:GetTableTurn()) == ply then chess:MovePiece( net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5), net.ReadUInt(5) ) end
 	end
 end)
 
 function ENT:ResetGame(ply)
-	if self:GetOwnerPly() != ply then return end
+	if self:GetPly(self:GetTableOwner()) != ply then return end
 	if IsValid(ply) then
 		local msg = "Resetting by request of " .. ply:Nick() .. " ("..ply:SteamID()..")"
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end

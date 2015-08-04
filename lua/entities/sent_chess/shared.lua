@@ -35,16 +35,8 @@ function ENT:ChangeStep(ch,c)
 	end
 end
 
-function ENT:GetTurnPly()
-	if self:GetTableTurn() then
-		return self:GetPly1()
-	else
-		return self:GetPly2()
-	end
-end
-
-function ENT:GetOwnerPly()
-	if self:GetTableOwner() then
+function ENT:GetPly(ply)
+	if ply then
 		return self:GetPly1()
 	else
 		return self:GetPly2()

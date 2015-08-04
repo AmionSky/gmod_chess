@@ -142,7 +142,7 @@ function ENT:AddHooks()
 	local last_time = RealTime() - 3
 	hook.Add("KeyPress", self, function(self, ply, key)
 		if not IsValid(self) then return end
-		if key == IN_RELOAD and self:GetOwnerPly() == ply and RealTime() - last_time > 3 then
+		if key == IN_RELOAD and self:GetPly(self:GetTableOwner()) == ply and RealTime() - last_time > 3 then
 			net.Start( 'Chess_Game' )
 				net.WriteUInt( self:EntIndex(), 32 )
 				net.WriteUInt( 1, 3 )
@@ -150,7 +150,7 @@ function ENT:AddHooks()
 			net.SendToServer()
 			last_time = RealTime()
 		end
-		if key == IN_ATTACK and self:GetTurnPly() == ply and self.look.x != 0 and self.look.y != 0 then
+		if key == IN_ATTACK and self:GetPly(self:GetTableTurn()) == ply and self.look.x != 0 and self.look.y != 0 then
 			if self.available[self.look.x][self.look.y] then
 				self:MovePiece(self.look.x,self.look.y)
 			else
@@ -263,7 +263,7 @@ function ENT:ResetGameCl()
 end
 
 function ENT:Think()
-	if LocalPlayer() != self:GetTurnPly() then return end
+	if LocalPlayer() != self:GetPly(self:GetTableTurn()) then return end
 	
 	local piecepos,pieceang = LocalToWorld(Vector(0.1, 0, 34.5), Angle(0, 180, 0), self:GetPos(), self:GetAngles())
 	local vec = util.IntersectRayWithPlane(LocalPlayer():EyePos(), LocalPlayer():EyeAngles():Forward(), piecepos, pieceang:Up())
@@ -361,7 +361,7 @@ function ENT:Draw()
 		cam.End3D2D()
 	end
 	
-	if LocalPlayer() == self:GetTurnPly() then
+	if LocalPlayer() == self:GetPly(self:GetTableTurn()) then
 		cam.Start3D2D( SetPosToChess(self:GetPos(), self:GetAngles(), 0, 0.2, 34.58 ), self:GetAngles(), 0.085 )
 		if self.look.x != 0 and self.look.y != 0 then
 			if ( self.brd_data[self.look.x][self.look.y] != 0 and (self:GetTableTurn() and self.brd_data[self.look.x][self.look.y] < 17) or ( not self:GetTableTurn() and self.brd_data[self.look.x][self.look.y] > 16)) then
