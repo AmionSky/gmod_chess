@@ -31,7 +31,7 @@ function ENT:ChangeStep(ch,c)
 	if c then n = 4 end
 	for i=1,n do
 		self.brd_data[ch[i][1]][ch[i][2]] = ch[i][3]
-		if ch[i][3] != 0 then self.piece.moved[ch[i][3]] = true
+		if ch[i][3] != 0 then self.piece.moved[ch[i][3]] = true end
 	end
 end
 

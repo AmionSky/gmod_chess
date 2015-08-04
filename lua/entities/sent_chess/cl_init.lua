@@ -46,7 +46,7 @@ local rectpos = {
 	}
 }
 local mdlsize = {
-	[1] = 0.13
+	[1] = 0.13,
 	[2] = 0.22
 }
 local ChessModels = {
