@@ -270,6 +270,7 @@ function ENT:ResetGameCl()
 	self.piece.type[22] = 3
 	self.piece.type[23] = 2
 	self.piece.type[24] = 1
+	self.kwarn = { ["x"] = 0, ["y"] = 0 }
 end
 
 function ENT:Think()
