@@ -151,7 +151,7 @@ function ENT:AddHooks()
 	local last_time = RealTime() - 3
 	hook.Add("KeyPress", self, function(self, ply, key)
 		if not IsValid(self) then return end
-		if key == IN_RELOAD and (( self:GetTableOwner() and self:GetPly1() == ply ) or ( not self:GetTableOwner() and self:GetPly2() == ply )) and RealTime() - last_time > 3 then
+		if key == IN_RELOAD and self:GetOwnerPly() == ply and RealTime() - last_time > 3 then
 			net.Start( 'Chess_Game' )
 				net.WriteUInt( self:EntIndex(), 32 )
 				net.WriteUInt( 1, 3 )

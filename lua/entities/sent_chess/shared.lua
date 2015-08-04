@@ -41,3 +41,11 @@ function ENT:GetTurnPly()
 		return self:GetPly2()
 	end
 end
+
+function ENT:GetOwnerPly()
+	if self:GetTableOwner() then
+		return self:GetPly1()
+	else
+		return self:GetPly2()
+	end
+end

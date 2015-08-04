@@ -20,7 +20,7 @@ net.Receive('Chess_Game', function()
 end)
 
 function ENT:ResetGame(ply)
-	if ( self:GetTableOwner() and self:GetPly1() != ply ) and ( not self:GetTableOwner() and self:GetPly2() != ply ) then return end
+	if self:GetOwnerPly() != ply then return end
 	if IsValid(ply) then
 		local msg = "Resetting by request of " .. ply:Nick() .. " ("..ply:SteamID()..")"
 		if IsValid(self:GetPly1()) then self:GetPly1():ChatPrint(msg) end
